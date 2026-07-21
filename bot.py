@@ -53,11 +53,14 @@ def run_market_scan() -> str:
 
     for symbol in symbols:
         try:
-            df_4h = get_klines(symbol, "4h", limit=100)
+            # EMA200 روی 4H نیاز به دیتای کافی برای گرم‌شدن داره؛ با ۱۰۰ کندل
+            # هنوز ~۳۷٪ وزن EMA200 روی اولین کندل دیتاست می‌مونه (نامعتبر).
+            # با ۳۰۰ کندل (۵۰ روز) این وزن به زیر ۵٪ می‌رسه.
+            df_4h = get_klines(symbol, "4h", limit=300)
             df_1h = get_klines(symbol, "1h", limit=100)
             df_15m = get_klines(symbol, "15m", limit=100)
 
-            if len(df_4h) < 30 or len(df_1h) < 30 or len(df_15m) < 30:
+            if len(df_4h) < 210 or len(df_1h) < 30 or len(df_15m) < 30:
                 continue
 
             result = analyze_symbol(symbol, df_4h, df_1h, df_15m)
