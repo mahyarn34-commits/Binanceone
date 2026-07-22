@@ -163,12 +163,15 @@ def confirm_trend_1h(df: pd.DataFrame, higher_trend: str, fast: int = 20, slow: 
 
     vol_ma = df["volume"].rolling(20).mean()
     volume_ok = bool(df["volume"].iloc[-1] > vol_ma.iloc[-1]) if not pd.isna(vol_ma.iloc[-1]) else True
+    # توجه: volume_ok دیگه شرط الزامی نیست — چون «حجم کندل فعلی > میانگین ۲۰تایی»
+    # عملاً یه فیلتر نزدیک به تصادفی (~۵۰٪ رد) بود که ترکیب‌شده با دو شرط دیگه
+    # به‌صورت AND، نرخ رد کاذب رو بی‌جهت بالا می‌برد. برای دیباگ/گزارش نگهش می‌داریم.
 
     swings = label_swings(find_swings(df))
     event = detect_last_structure_event(df, swings, higher_trend)
     choch_against = event.type == "CHoCH" and event.direction != higher_trend
 
-    trend = higher_trend if (ema_agrees and volume_ok and not choch_against) else "NEUTRAL"
+    trend = higher_trend if (ema_agrees and not choch_against) else "NEUTRAL"
     return TrendResult(trend=trend, ema_fast=ef, ema_slow=es, last_event=event, swings=swings)
 
 
